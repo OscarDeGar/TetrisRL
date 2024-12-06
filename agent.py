@@ -1,64 +1,45 @@
-import multiprocessing
-import queue
+from queue import Queue, Empty
 import time
+import threading
 
 from tetris import Main
 
-def run_tetris(input_queue, output_queue, game_id):
-    """Run a single Tetris game instance."""
-    print(f"Starting Tetris game {game_id}")
-    main = Main(input_queue, output_queue)
-    main.run()
+# Start a thread or process for the agent
+def agent_logic(input_queue, output_queue):
+    while True:
+        try:
+            # Retrieve the game state
+            if not output_queue.empty():
+                state = output_queue.get()
+                # print("Received state:")
+                print(state)
+                # for row in state["field_data"]:
+                #     print(row)
+
+                # Generate an action based on the state (example action)
+                action = {"action": "move_left"}
+                input_queue.put(action)
+        except Empty:
+            # Queue is empty; sleep briefly to avoid busy-waiting
+            time.sleep(0.01)
+        except Exception as e:
+            print(f"Agent encountered an error: {e}")
+            break
 
 
 if __name__ == "__main__":
-    num_games = 3  # Number of Tetris games to run
-    input_queues = []
-    output_queues = []
-    processes = []
 
-    # Set up queues and processes
-    for game_id in range(num_games):
-        input_queue = multiprocessing.Queue()
-        output_queue = multiprocessing.Queue()
-        input_queues.append(input_queue)
-        output_queues.append(output_queue)
+    # Create input and output queues
+    input_queue = Queue()
+    output_queue = Queue()
 
-        # Create a process for each Tetris game
-        process = multiprocessing.Process(
-            target=run_tetris,
-            args=(input_queue, output_queue, game_id,)
-        )
-        processes.append(process)
+    # Initialize the game
+    tetris = Main(input_queue=input_queue, output_queue=output_queue)
 
-    # Start all processes
-    for process in processes:
-        process.start()
+    agent_thread = threading.Thread(target=agent_logic, args=(input_queue, output_queue), daemon=True)
+    agent_thread.start()
 
-    try:
-        while True:
-            # Loop over each game to send input and receive state
-            for game_id in range(num_games):
-                try:
-                    # Get the current state of the game
-                    # print(output_queues[game_id])
-                    state = output_queues[game_id].get_nowait()
-                    # print(f"Game {game_id} state: {state}")
-                except queue.Empty:
-                    pass  # No state update available
+    # Run the game
+    tetris.run()
 
-                # Send random or controlled input to the game
-                # Replace this with actual input logic (e.g., from an agent or user)
-                # input_action = choice(["left", "right", "rotate", "drop"])
-                # input_queues[game_id].put(input_action)
-
-            # Add a short delay to control the update rate
-            time.sleep(0.1)
-
-    except KeyboardInterrupt:
-        print("Shutting down games...")
-        for process in processes:
-            process.terminate()
-        for process in processes:
-            process.join()
 

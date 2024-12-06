@@ -1,0 +1,72 @@
+#################################################
+Hyperparams:
+-alpha=0.1, 
+-epsilon=0.2, 
+-gamma=0.99, 
+-timeout=50000
+
+Rewards:
+-height_factor(2,22,0.25,0)
+
+#################################################
+Hyperparams:
+-alpha=0.12,
+-epsilon=0.15,
+-gamma=0.99, 
+-timeout=15000
+
+Rewards:
+-height_factor(2,22,0.6,0)
+-fill_factor(2,22,0,0.5)
+
+#################################################
+Hyperparams:
+sarsa_agent = SARSA(alpha=0.12, epsilon=0.15, gamma=0.97, timeout=15000)
+
+Rewards:
+-height_factor(2,22,0.5,0)
+-fill_factor(2,22,0,0.5)
+
+#################################################
+Hyperparams:
+sarsa_agent = SARSA(alpha=0.12, epsilon=0.15, gamma=0.97, timeout=200000)
+
+Rewards:
+-height_factor(2,22,0.5,0)
+-fill_factor(2,22,0,0.5)
+
+#################################################
+
+Hyperparams:
+sarsa_agent = SARSA(alpha=0.12, epsilon=0.1, gamma=0.96, timeout=300000)
+
+Rewards:
+-height_factor_pos(2,22,0,0.5)
+-height_factor_pos(2,22,0.25,0)
+-fill_factor(2,22,0,0.5)
+# Example reward: Count completed rows
+        score_diff = score - score_prev
+
+        line_factor = lines * 0.1
+
+        fill_factor = self.filled_factor(current_state)
+        height_scaler = self.height_factor(current_state,"Pos")
+
+        fill_r = fill_factor + (fill_factor * height_scaler)
+        
+        pos_r = score_diff + (score_diff*line_factor) + fill_r  
+
+        height_pen = self.height_factor(current_state,"Neg")
+        hole_pen = self.hole_factor(current_state)
+        # print(height_pen,flush=True)
+        # print(hole_pen,flush=True)
+        neg_r =  hole_pen + (hole_pen * height_pen)
+
+        reward = pos_r - neg_r
+
+        return reward
+
+#################################################
+
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=300000, Q = policy)
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=700000?, Q = policy)

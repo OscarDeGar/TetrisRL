@@ -24,13 +24,27 @@ class Game:
 		self.line_surface.set_colorkey((0,255,0))
 		self.line_surface.set_alpha(120)
 
+		# Orientations
+		self.orientations = {
+            'I': 2,
+            'O': 1,
+            'T': 4,
+            'S': 2,
+            'Z': 2,
+            'J': 4,
+            'L': 4,
+        }
+		
 		# tetromino
 		self.field_data = [[0 for x in range(COLUMNS)] for y in range(ROWS)]
+		self.binary_field = [[0 for x in range(COLUMNS)] for y in range(ROWS)]
 		self.tetromino = Tetromino(
 			choice(list(TETROMINOS.keys())), 
 			self.sprites, 
 			self.create_new_tetromino,
-			self.field_data)
+			self.field_data,
+			self.binary_field,
+			self.orientations)
 
 		# timer 
 		self.down_speed = UPDATE_START_SPEED
@@ -49,7 +63,7 @@ class Game:
 		self.current_level = 1
 		self.current_score = 0
 		self.current_lines = 0
-
+		self.reset_flag = False  # Initialize reset flag
 
 	def calculate_score(self, num_lines):
 		self.current_lines += num_lines
@@ -64,18 +78,26 @@ class Game:
 		self.update_score(self.current_lines, self.current_score, self.current_level)
 
 	def check_game_over(self):
+		if self.tetromino is None:
+			return  # No tetromino to check, so exit the method
 		for block in self.tetromino.blocks:
 			if block.pos.y < 2:
-				exit()
+				print("Game Over! Resetting...", flush=True)
+				self.reset()
+				return
 
-	def create_new_tetromino(self):
-		self.check_game_over()
+	def create_new_tetromino(self, check_game_over=True):
+		if check_game_over:
+			self.check_game_over()
 		self.check_finished_rows()
 		self.tetromino = Tetromino(
-			self.get_next_shape(), 
-			self.sprites, 
+			self.get_next_shape(),
+			self.sprites,
 			self.create_new_tetromino,
-			self.field_data)
+			self.field_data,
+			self.binary_field,
+			self.orientations
+		)
 
 	def timer_update(self):
 		for timer in self.timers.values():
@@ -158,29 +180,78 @@ class Game:
 			# rebuild the field data 
 			self.field_data = [[0 for x in range(COLUMNS)] for y in range(ROWS)]
 			for block in self.sprites:
-				self.field_data[int(block.pos.y)][int(block.pos.x)] = 1
+				self.field_data[int(block.pos.y)][int(block.pos.x)] = block
+				self.binary_field[int(block.pos.y)][int(block.pos.x)] = 1
 
 			# update score
 			self.calculate_score(len(delete_rows))
 
-	def run(self):
+	def reset(self):
+		# Kill all sprites in the sprites group
+		for sprite in self.sprites:
+			sprite.kill()
 
-		# update
+		# Clear the sprites group
+		self.sprites.empty()
+
+		# Kill any blocks in field_data and remove references
+		for y in range(ROWS):
+			for x in range(COLUMNS):
+				block = self.field_data[y][x]
+				if block:
+					block.kill()
+					self.field_data[y][x] = 0
+					self.binary_field[y][x] = 0
+
+		# Clear field data
+		self.field_data = [[0 for _ in range(COLUMNS)] for _ in range(ROWS)]
+		self.binary_field = [[0 for _ in range(COLUMNS)] for _ in range(ROWS)]
+
+		# Reset tetromino
+		self.tetromino = None
+
+		# Reset game variables
+		self.current_level = 1
+		self.current_score = 0
+		self.current_lines = 0
+		self.update_score(0, 0, 1)
+
+		# Set reset flag to True
+		self.reset_flag = True
+		
+		# Reset timers
+		self.down_speed = UPDATE_START_SPEED
+		self.down_speed_faster = self.down_speed * 0.3
+		self.timers['vertical move'].duration = self.down_speed
+		self.timers['vertical move'].activate()
+
+		# Clear the surface
+		self.surface.fill(GRAY)
+
+		print("Game has been reset!", flush=True)
+
+		# Create a new tetromino
+		self.create_new_tetromino()
+
+	def run(self):
+		# Update game logic
 		self.input()
 		self.timer_update()
 		self.sprites.update()
 
-		# drawing 
+		# Clear the surface
 		self.surface.fill(GRAY)
-		self.sprites.draw(self.surface)
 
+		# Draw the current state
+		self.sprites.draw(self.surface)
 		self.draw_grid()
-		self.display_surface.blit(self.surface, (PADDING,PADDING))
+		self.display_surface.blit(self.surface, (PADDING, PADDING))
+
 		pygame.draw.rect(self.display_surface, LINE_COLOR, self.rect, 2, 2)
-		pygame.draw.line(self.display_surface, (255,0,0), (20,100), (420,100), 2)
+		pygame.draw.line(self.display_surface, (255, 0, 0), (20, 100), (420, 100), 2)
 
 class Tetromino:
-	def __init__(self, shape, group, create_new_tetromino, field_data):
+	def __init__(self, shape, group, create_new_tetromino, field_data, binary_field, orientations):
 
 		# setup 
 		self.shape = shape
@@ -188,9 +259,10 @@ class Tetromino:
 		self.color = TETROMINOS[shape]['color']
 		self.create_new_tetromino = create_new_tetromino
 		self.field_data = field_data
+		self.binary_field = binary_field
 
 		# create blocks
-		self.blocks = [Block(group, pos, self.color) for pos in self.block_positions]
+		self.blocks = [Block(group, pos, self.color, shape, orientations) for pos in self.block_positions]
 
 	# collisions
 	def next_move_horizontal_collide(self, blocks, amount):
@@ -229,7 +301,8 @@ class Tetromino:
 		# Update the field data with the new block positions, ensuring y >= 0
 		for block in self.blocks:
 			if block.pos.y >= 0:
-				self.field_data[int(block.pos.y)][int(block.pos.x)] = 1
+				self.field_data[int(block.pos.y)][int(block.pos.x)] = block
+				self.binary_field[int(block.pos.y)][int(block.pos.x)] = 1
 
 		# Create a new tetromino since the current one has been placed
 		self.create_new_tetromino()
@@ -251,7 +324,8 @@ class Tetromino:
 			# Place the blocks in the field_data as integers
 			for block in self.blocks:
 				if block.pos.y >= 0:
-					self.field_data[int(block.pos.y)][int(block.pos.x)] = 1
+					self.field_data[int(block.pos.y)][int(block.pos.x)] = block
+					self.binary_field[int(block.pos.y)][int(block.pos.x)] = 1
 			self.create_new_tetromino()
 
 	# rotate
@@ -283,7 +357,7 @@ class Tetromino:
 				block.pos = new_block_positions[i]
 
 class Block(pygame.sprite.Sprite):
-	def __init__(self, group, pos, color):
+	def __init__(self, group, pos, color, shape, orientations):
 		
 		# general
 		super().__init__(group)
@@ -294,11 +368,13 @@ class Block(pygame.sprite.Sprite):
 		self.orientation = 0
 		self.pos = pygame.Vector2(pos) + BLOCK_OFFSET
 		self.rect = self.image.get_rect(topleft = self.pos * CELL_SIZE)
+		self.shape = shape
 		
+		self.max_orientations = orientations.get(shape, 1)
 
 	def rotate(self, pivot_pos):
 
-		self.orientation = (self.orientation + 1) % 4
+		self.orientation = (self.orientation + 1) % self.max_orientations
 		return pivot_pos + (self.pos - pivot_pos).rotate(90)
 
 	def horizontal_collide(self, x, field_data):
@@ -318,3 +394,7 @@ class Block(pygame.sprite.Sprite):
 	def update(self):
 
 		self.rect.topleft = self.pos * CELL_SIZE
+
+	def kill(self):
+		super().kill()
+		# print(f"Block at position {self.pos} has been killed.", flush=True)
