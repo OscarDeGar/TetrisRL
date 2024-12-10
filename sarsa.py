@@ -532,10 +532,11 @@ if __name__ == "__main__":
     tetris = Main(input_queue=input_queue, output_queue=output_queue)
 
     # Load previous Q
-    with open('results/Agg_Learning_q_values_small_20241209_004256_887ccc71.json', 'r') as file:
+    with open('results/Agg_Learning_q_values_small_20241209_222106_f736999a.json', 'r') as file:
         policy = json.load(file)
     # Initialize the SARSA agent
-    sarsa_agent = SARSA(alpha=0.15, epsilon=0.3, gamma=0.99, timeout=1000000, Q = policy, file="Agg_Learning")
+    sarsa_agent = SARSA(alpha=0.15, epsilon=0.3, gamma=0.99, timeout=300000, Q = policy, file="Agg_Learning")
+    
 
     # Run the SARSA agent
     sarsa_agent.run(input_queue, output_queue, tetris)

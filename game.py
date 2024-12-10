@@ -24,6 +24,8 @@ class Game:
 		self.line_surface.set_colorkey((0,255,0))
 		self.line_surface.set_alpha(120)
 
+	
+
 		# Orientations
 		self.orientations = {
             'I': 2,
@@ -39,7 +41,7 @@ class Game:
 		self.field_data = [[0 for x in range(COLUMNS)] for y in range(ROWS)]
 		self.binary_field = [[0 for x in range(COLUMNS)] for y in range(ROWS)]
 		self.tetromino = Tetromino(
-			choice(list(TETROMINOS.keys())), 
+			self.get_next_shape(), 
 			self.sprites, 
 			self.create_new_tetromino,
 			self.field_data,

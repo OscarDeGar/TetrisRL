@@ -154,3 +154,13 @@ sarsa_agent = SARSA(alpha=0.09, epsilon=0.16, gamma=0.99, timeout=1000000, Q = N
 
 
 {"Agent": "Sarsa", "Alpha": 0.15, "Epsilon": 0.3, "Gamma": 0.99, "File_handle": "Agg_Learning", "Runtime": 1000000}
+
+###################################### BAG RANDOM FIXED ################################################
+10x8 Board
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.3, gamma=0.99, timeout=100000, Q = None, file="Agg_Learning")
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.3, gamma=0.99, timeout=300000, Q = policy, file="Agg_Learning")
+
+q_agent = Q_Learning(alpha=0.09, epsilon=0.5, min_epsilon= 0.05, gamma=0.96, timeout=750000, Q = None, file = "Bag_Q")
+q_agent = Q_Learning(alpha=0.09, epsilon=0.5, min_epsilon= 0.05, gamma=0.96, timeout=300000, Q = policy, file = "Bag_Q")
+
+

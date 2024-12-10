@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load episode log
-with open('results/Agg_Learning_episode_log_small_20241209_004256_887ccc71.json', 'r') as file:
+with open('results/q_learning/Bag_Q_episode_log_small_20241210_010837_31701747.json', 'r') as file:
     log = json.load(file)
 
 episode_rewards = log["episode_rewards"]

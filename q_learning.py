@@ -561,10 +561,10 @@ if __name__ == "__main__":
     tetris = Main(input_queue=input_queue, output_queue=output_queue)
 
     # Load previous Q
-    with open('results/q_learning/E_decays_1_q_values_small_20241208_155421_a045ca79.json', 'r') as file:
+    with open('results/q_learning/Bag_Q_q_values_small_20241209_222941_ec03dc1e.json', 'r') as file:
         policy = json.load(file)
     # Initialize the SARSA agent
-    q_agent = Q_Learning(alpha=0.09, epsilon=0.5, min_epsilon= 0.05, gamma=0.96, timeout=750000, Q = policy, file = "E_decays_1_v2")
+    q_agent = Q_Learning(alpha=0.09, epsilon=0.5, min_epsilon= 0.05, gamma=0.96, timeout=300000, Q = policy, file = "Bag_Q")
 
     # Run the SARSA agent
     q_agent.run(input_queue, output_queue, tetris)

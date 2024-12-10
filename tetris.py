@@ -21,7 +21,26 @@ class Main:
 		pygame.display.set_caption('Tetris')
 
 		# shapes
-		self.next_shapes = [choice(list(TETROMINOS.keys())) for shape in range(3)]
+		self.next_shapes = {
+			'I': 0,
+            'O': 0,
+            'T': 0,
+            'S': 0,
+            'Z': 0,
+            'J': 0,
+            'L': 0,
+		}
+
+
+		self.shape_resets = {
+			'I': 0,
+            'O': 0,
+            'T': 0,
+            'S': 0,
+            'Z': 0,
+            'J': 0,
+            'L': 0,
+		}
 
 		# components
 		self.game = Game(self.get_next_shape, self.update_score)
@@ -40,8 +59,29 @@ class Main:
 
 	### GET NEXT SHAPE
 	def get_next_shape(self):
-		next_shape = self.next_shapes.pop(0)
-		self.next_shapes.append(choice(list(TETROMINOS.keys())))
+		temp = []
+		used_ct = 0
+		for key,value in self.next_shapes.items():
+			# print(key)
+			if value == 0:
+				temp.append(key)
+			else:
+				used_ct += 1
+		if used_ct == 7:
+			self.next_shapes = self.shape_resets.copy()
+			# print(self.next_shapes,flush=True)
+			keys = list(self.next_shapes.keys())
+			next_shape = choice(keys)
+
+			self.next_shapes[next_shape] =  1
+			return next_shape
+		# print(temp,flush=True)
+		next_shape = choice(temp)
+		self.next_shapes[next_shape] = 1
+
+		# next_shape = self.next_shapes.pop(0)
+		# self.next_shapes.append(choice(list(TETROMINOS.keys())))
+		
 		return next_shape
 	
 	### INPUT AGENT COMMANDS
@@ -163,7 +203,7 @@ class Main:
 			# components
 			self.game.run()
 			self.score.run()
-			self.preview.run(self.next_shapes)
+			# self.preview.run(self.next_shapes)
 
 			# Update Queues
 			self.output_data()
