@@ -81,7 +81,7 @@ class Game:
 		if self.tetromino is None:
 			return  # No tetromino to check, so exit the method
 		for block in self.tetromino.blocks:
-			if block.pos.y < 2:
+			if block.pos.y < 4:
 				print("Game Over! Resetting...", flush=True)
 				self.reset()
 				return
@@ -248,7 +248,7 @@ class Game:
 		self.display_surface.blit(self.surface, (PADDING, PADDING))
 
 		pygame.draw.rect(self.display_surface, LINE_COLOR, self.rect, 2, 2)
-		pygame.draw.line(self.display_surface, (255, 0, 0), (20, 100), (420, 100), 2)
+		pygame.draw.line(self.display_surface, (255, 0, 0), (20, 180), (420, 180), 2)
 
 class Tetromino:
 	def __init__(self, shape, group, create_new_tetromino, field_data, binary_field, orientations):

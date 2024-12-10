@@ -68,5 +68,89 @@ Rewards:
 
 #################################################
 
-sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=300000, Q = policy)
-sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=700000?, Q = policy)
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=300000, Q = policy)  2.6
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=700000, Q = policy) 5.4
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=200000, Q = policy) 1.6
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=200000, Q = policy) 1.6
+sarsa_agent = SARSA(alpha=0.15, epsilon=0.05, gamma=0.90, timeout=1000000, Q = policy) 
+
+
+
+#################################################
+10 x 8 BOARD
+sarsa_agent = SARSA(alpha=0.125, epsilon=0.05, gamma=0.95, timeout=200000, Q = None)
+episode_log_small_20241206_145914_dc1a57b8
+
+#################################################
+8 x 6 BOARD
+sarsa_agent = SARSA(alpha=0.125, epsilon=0.05, gamma=0.95, timeout=20000, Q = None)
+episode_log_small_20241206_145914_dc1a57b8
+#################################################
+
+sarsa_agent = SARSA(alpha=0.125, epsilon=0.05, gamma=0.95, timeout=200000, Q = None)
+episode_log_small_20241206_172529_1199258e
+
+#################################################
+sarsa_agent = SARSA(alpha=0.125, epsilon=0.1, gamma=0.95, timeout=200000, Q = None) 1.5
+episode_log_small_20241206_223516_9cc2a27d.json
+sarsa_agent = SARSA(alpha=0.125, epsilon=0.1, gamma=0.95, timeout=1000000, Q = policy) 7.5
+episode_log_small_20241207_104246_96cf9347.json
+
+
+##################################################################################################
+BEST
+neg_r =  hole_pen + (hole_pen * height_pen)
+sarsa_agent = SARSA(alpha=0.095, epsilon=0.125, gamma=0.98, timeout=300000, Q = None) Good
+DONE q_values_small_20241207_154109_ad841134
+sarsa_agent = SARSA(alpha=0.095, epsilon=0.125, gamma=0.98, timeout=300000, Q = policy, file="Test_alpha")
+DONE Test_alpha_episode_log_small_20241207_183018_423f865c.json
+sarsa_agent = SARSA(alpha=0.095, epsilon=0.125, gamma=0.98, timeout=600000, Q = policy, file="Test_alpha_v2")
+DONE Test_alpha_v2_episode_log_small_20241207_234728_66fc41ed.json - improvement minimal
+
+
+##################################################################################################
+sarsa_agent = SARSA(alpha=0.08, epsilon=0.14, gamma=0.98, timeout=1000000, Q = None, file="Test_low")
+
+##################################################################################################
+sarsa_agent = SARSA(alpha=0.1, epsilon=0.16, gamma=0.99, timeout=300000, Q = None) could be better
+DONE q_values_small_20241207_154729_482a83cf
+
+
+##################################################################################################
+sarsa_agent = SARSA(alpha=0.08, epsilon=0.2, gamma=0.96, timeout=1000000, Q = None, file="Test_High_E")
+
+
+
+##################################################################################################
+q_agent = Q_Learning(alpha=0.1, epsilon=0.16, gamma=0.99, timeout=300000, Q = None), good and learning, but not great
+DONE q_learinng/episode_log_small_20241207_165202_ed792267.json
+
+##################################################################################################
+q_agent = Q_Learning(alpha=0.095, epsilon=0.125, gamma=0.98, timeout=300000, Q = None, file = "Test_beta")
+DONE Test_beta_episode_log_small_20241207_183154_e6a64061.json
+
+
+##################################################################################################
+q_agent = Q_Learning(alpha=0.09, epsilon=0.5, min_epsilon= 0.05, gamma=0.96, timeout=500000, Q = None, file = "E_decays_1")
+q_agent = Q_Learning(alpha=0.09, epsilon=0.5, min_epsilon= 0.05, gamma=0.96, timeout=750000, Q = policy, file = "E_decays_1_v2")
+
+
+##################################################################################################
+q_agent = Q_Learning(alpha=0.12, epsilon=0.5, min_epsilon= 0.1, gamma=0.97, timeout=500000, Q = None, file = "E_aggr_decay_1")
+q_agent = Q_Learning(alpha=0.12, epsilon=0.5, min_epsilon= 0.05, gamma=0.97, timeout=700000, Q = policy, file = "E_aggr_decay_1_v2")
+
+
+
+##################################################################################################
+q_agent = Q_Learning(alpha=0.1, epsilon=0.3, min_epsilon= 0.05, gamma=0.98, timeout=500000, Q = None, file = "E_Party_1")
+DONE 
+
+
+
+sarsa_agent = SARSA(alpha=0.085, epsilon=0.3, gamma=0.99, timeout=1000000, Q = None, file="Test_agg_E_Sarsa")
+
+
+sarsa_agent = SARSA(alpha=0.09, epsilon=0.16, gamma=0.99, timeout=1000000, Q = None, file="Test_low_new")
+
+
+{"Agent": "Sarsa", "Alpha": 0.15, "Epsilon": 0.3, "Gamma": 0.99, "File_handle": "Agg_Learning", "Runtime": 1000000}

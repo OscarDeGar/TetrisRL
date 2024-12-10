@@ -1,8 +1,8 @@
 import pygame 
 
 # Game size 
-COLUMNS = 10
-ROWS = 22
+COLUMNS = 8
+ROWS = 10
 CELL_SIZE = 40
 GAME_WIDTH, GAME_HEIGHT = COLUMNS * CELL_SIZE, ROWS * CELL_SIZE
 
@@ -45,4 +45,4 @@ TETROMINOS = {
 	'Z': {'shape': [(0,0), (1,0), (0,-1), (-1,-1)], 'color': RED}
 }
 
-SCORE_DATA = {1: 40, 2: 100, 3: 300, 4: 1200}
+SCORE_DATA = {1: 60, 2: 140, 3: 300, 4: 1200}

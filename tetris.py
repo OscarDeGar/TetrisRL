@@ -84,7 +84,7 @@ class Main:
 			if key:
 				# Simulate KEYDOWN
 				pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {"key": key}))
-				# pygame.time.wait(1)
+				# pygame.time.wait(50)
 				# Simulate KEYUP (optional, depends on your game's input handling)
 				pygame.event.post(pygame.event.Event(pygame.KEYUP, {"key": key}))
 

@@ -3,11 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load episode log
-with open('results/Agg_Learning_episode_log_small_20241209_004256_887ccc71.json', 'r') as file:
-    log = json.load(file)
+with open('results/evaluation/PE_High_E_Q_episode_rewards_20241208_125059_1a8a5fa4.json', 'r') as file:
+    episode_rewards = json.load(file)
 
-episode_rewards = log["episode_rewards"]
-step_scores = log["all_step_scores"]
+with open('results/evaluation/PE_High_E_Q_step_scores_20241208_125059_1a8a5fa4.json', 'r') as file:
+    step_scores = json.load(file)
+
 print(len(episode_rewards))
 # print(len(episode_rewards))
 
@@ -19,8 +20,11 @@ def smooth(data, window_size=10):
     return np.convolve(data, np.ones(window_size)/window_size, mode='valid')
 
 # Apply smoothing to total rewards and episode lengths
-smoothed_rewards = smooth(total_rewards, window_size=100)
-smoothed_lengths = smooth(episode_lengths, window_size=100)
+# smoothed_rewards = smooth(total_rewards, window_size=1)
+# smoothed_lengths = smooth(episode_lengths, window_size=1)
+smoothed_rewards = total_rewards
+smoothed_lengths = episode_lengths
+
 
 # Plot smoothed total rewards
 plt.figure(figsize=(10, 6))
@@ -44,7 +48,7 @@ plt.show()
 
 # Plot histogram of rewards
 plt.figure(figsize=(10, 6))
-plt.hist(total_rewards, bins=25, alpha=0.7, color='blue', edgecolor='black')
+plt.hist(total_rewards, bins=15, alpha=0.7, color='blue', edgecolor='black')
 plt.xlabel("Total Rewards")
 plt.ylabel("Frequency")
 plt.title("Distribution of Total Rewards")
@@ -53,7 +57,7 @@ plt.show()
 
 # Plot histogram of episode lengths
 plt.figure(figsize=(10, 6))
-plt.hist(episode_lengths, bins=25, alpha=0.7, color='orange', edgecolor='black')
+plt.hist(episode_lengths, bins=15, alpha=0.7, color='orange', edgecolor='black')
 plt.xlabel("Episode Lengths")
 plt.ylabel("Frequency")
 plt.title("Distribution of Episode Lengths")
@@ -61,7 +65,7 @@ plt.grid(axis='y')
 plt.show()
 
 
-all_step_scores = log['all_step_scores']
+all_step_scores = step_scores
 
 # Compute the average score at each step index
 
@@ -84,22 +88,3 @@ plt.ylabel("Average Score")
 plt.title("Average Scores Per Step Index")
 plt.legend()
 plt.show()
-
-# # Plot cumulative rewards
-# plt.figure(figsize=(10, 5))
-# plt.plot(range(len(cumulative_rewards)), cumulative_rewards, label="Cumulative Reward")
-# plt.xlabel("Episode Index")
-# plt.ylabel("Cumulative Reward")
-# plt.title("Cumulative Rewards Across Episodes")
-# plt.legend()
-# plt.show()
-
-# # Plot step scores
-# plt.figure(figsize=(10, 6))
-# plt.plot(range(len(step_scores)), step_scores, label="Step Rewards", color="green")
-# plt.xlabel("Time Step")
-# plt.ylabel("Step Reward")
-# plt.title("Rewards at Each Time Step")
-# plt.legend()
-# plt.grid()
-# plt.show()

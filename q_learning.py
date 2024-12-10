@@ -11,25 +11,15 @@ import hashlib
 import os
 import uuid
 
-def default_int():
-    return 0
 
-def default_level_3():
-    return defaultdict(default_int)
-
-def default_level_2():
-    return defaultdict(default_level_3)
-
-def default_level_1():
-    return defaultdict(default_level_2)
-
-class SARSA(object):
-    def __init__(self, alpha, epsilon, gamma, timeout, Q = None, file = None):
+class Q_Learning(object):
+    def __init__(self, alpha, epsilon, min_epsilon, gamma, timeout, Q = None, file = None):
         
         ###  HYPERPARAMS
         self.alpha = alpha
         self.epsilon = epsilon
         self.gamma = gamma
+        self.min_epsilon = min_epsilon
         print("PARAMS:",flush=True)
         print(f"Alpha: {self.alpha}",flush=True)
         print(f"Epsilon: {self.epsilon}",flush=True)
@@ -64,17 +54,20 @@ class SARSA(object):
             self.Q = {}
         else:
             self.Q = Q
-            # print(Q)
 
         ### TIMEOUT
+        self.timeout = timeout
+
+        self.t = 0
         self.timeout = timeout
         if file is not None:
             self.file = file
 
             self.params = {
-                "Agent": "Sarsa",
+                "Agent": "Q_learning",
                 "Alpha": self.alpha,
                 "Epsilon": self.epsilon,
+                "Min_E": self.min_epsilon,
                 "Gamma": self.gamma,
                 "File_handle": self.file,
                 "Runtime": self.timeout
@@ -82,18 +75,17 @@ class SARSA(object):
             print(f"FILE_HANDLE: {self.file}",flush=True)
         else:
             self.params = {
-            "Agent": "Sarsa",
+            "Agent": "Q_learning",
             "Alpha": self.alpha,
             "Epsilon": self.epsilon,
+            "Min_E": self.min_epsilon,
             "Gamma": self.gamma,
             "Runtime": self.timeout
         }
-        self.t = 0
-
         self.episode_lengths = 0
         self.episodes_rewards = []
 
-        
+        self.epsilon_table = np.linspace(self.epsilon, self.min_epsilon, self.timeout)
 
     def run(self, input_queue, output_queue, game):
         """
@@ -135,7 +127,7 @@ class SARSA(object):
                         timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
                         
                         # Ensure the results folder exists
-                        results_folder = "results"
+                        results_folder = "results/q_learning"
                         os.makedirs(results_folder, exist_ok=True)
 
                         unique_id = uuid.uuid4().hex[:8]  # Short unique identifier
@@ -273,6 +265,24 @@ class SARSA(object):
         # RUN TETRIS AGENT
         game.run()
 
+    def decayed_epsilon(self):
+        """
+        Compute the decayed epsilon value based on the current time step and timeout.
+        The decay follows a linear mapping from epsilon_initial to a minimum value.
+        """
+        # Desired start and end values
+        # epsilon_initial = 0.4
+        # min_epsilon = 0.05
+        # Timeout is large, e.g., 500,000 steps
+        # Let's pick an exponent > 1 to delay the decay
+        # The larger the exponent, the longer epsilon stays high and only rapidly falls at the end.
+        # exponent = 3.0
+
+        # decay_ratio = self.t / self.timeout  # from 0 to 1
+        # (1 - decay_ratio) starts at 1 and goes to 0, raising it to a power makes it decay slowly at first
+        # decayed_value = self.epsilon (1 - decay_ratio)**int(self.t)
+        return self.epsilon + (self.t-1 / (self.timeout - 1)) * (self.min_epsilon - self.epsilon)
+
     def choose_action(self, state, shape):
         """
         Choose an action using epsilon-greedy policy
@@ -283,6 +293,11 @@ class SARSA(object):
         Return:
             action: selected action as (orientation, pos.x)
         """
+        # Update epsilon dynamically
+        # self.epsilon = self.decayed_epsilon()
+        self.epsilon = self.epsilon_table[self.t-1]
+        print(self.epsilon,flush=True)
+
         state_key = self.hash_state(state)
 
         ### RANDOM GREEDY(EXPLORE)
@@ -336,7 +351,7 @@ class SARSA(object):
         print(f"CURR_q  {current_q}", flush=True)
 
         # Retrieve next Q-value
-        next_q = self.get_q_value(next_state_key, shape, next_action[0], next_action[1]) 
+        next_q = self.get_max_q_value(next_state_key, shape)
         # self.Q[next_state_key][shape][next_action[0]].get(next_action[1], 0)
 
         # SARSA update
@@ -357,6 +372,20 @@ class SARSA(object):
         if pos_x not in self.Q[state][shape][orientation]:
             self.Q[state][shape][orientation][pos_x] = default
         return self.Q[state][shape][orientation][pos_x]
+    
+    def get_max_q_value(self, state, shape):
+        
+        max_next_q = float('-inf')
+        for next_orientation in self.action_space[shape].keys():
+            for next_pos_x in self.action_space[shape][next_orientation]:
+                next_q = self.get_q_value(state, shape, next_orientation, next_pos_x)
+                if next_q > max_next_q:
+                        max_next_q = next_q
+
+        if max_next_q == float('-inf'):  # Handle cases where next_state has no actions
+            max_next_q = 0
+
+        return max_next_q
     
     def calculate_reward(self, prev_state, current_state, score_prev, score, lines):
         """
@@ -532,10 +561,10 @@ if __name__ == "__main__":
     tetris = Main(input_queue=input_queue, output_queue=output_queue)
 
     # Load previous Q
-    with open('results/Agg_Learning_q_values_small_20241209_004256_887ccc71.json', 'r') as file:
+    with open('results/q_learning/E_decays_1_q_values_small_20241208_155421_a045ca79.json', 'r') as file:
         policy = json.load(file)
     # Initialize the SARSA agent
-    sarsa_agent = SARSA(alpha=0.15, epsilon=0.3, gamma=0.99, timeout=1000000, Q = policy, file="Agg_Learning")
+    q_agent = Q_Learning(alpha=0.09, epsilon=0.5, min_epsilon= 0.05, gamma=0.96, timeout=750000, Q = policy, file = "E_decays_1_v2")
 
     # Run the SARSA agent
-    sarsa_agent.run(input_queue, output_queue, tetris)
+    q_agent.run(input_queue, output_queue, tetris)
